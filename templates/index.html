@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LibraryBook - Sistem Metadata Otomatis</title>
-    <!-- Font Plus Jakarta Sans untuk kesan modern premium -->
+    <!-- Font Plus Jakarta Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -12,70 +12,203 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] }
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
                 }
             }
         }
     </script>
     <style>
-        body { background-color: #09090b; } /* Pure dark zinc background */
-        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        body { background-color: #09090b; scroll-behavior: smooth; }
         
-        .nav-active { color: #ffffff !important; font-weight: 700; border-bottom: 2px solid #ffffff; }
+        /* Staggered Animations */
+        .fade-in-up { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
         
-        ::-webkit-scrollbar { width: 6px; }
+        @keyframes fadeInUp { 
+            from { opacity: 0; transform: translateY(20px) scale(0.98); } 
+            to { opacity: 1; transform: translateY(0) scale(1); } 
+        }
+        
+        /* Nav Underline Animation */
+        .nav-active { color: #ffffff !important; font-weight: 700; position: relative; }
+        .nav-active::after {
+            content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px;
+            background-color: #ffffff; border-radius: 2px;
+            animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes slideIn { from { width: 0; left: 50%; } to { width: 100%; left: 0; } }
+        
+        ::-webkit-scrollbar { width: 6px; height: 4px; }
         ::-webkit-scrollbar-track { background: #09090b; }
         ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #52525b; }
 
-        /* Space Gray Glass Card */
+        /* Enhanced Glass Card with 3D Hover */
         .dark-glass {
-            background: rgba(24, 24, 27, 0.5); /* zinc-900 with transparency */
+            background: rgba(24, 24, 27, 0.4); 
             backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .dark-glass:hover {
-            background: rgba(39, 39, 42, 0.6); /* zinc-800 */
+            background: rgba(39, 39, 42, 0.6); 
             border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.4);
+            transform: translateY(-6px) scale(1.01);
+            box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.5);
         }
+
+        /* Mobile Scrollable Nav */
+        .mobile-nav-scroll {
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .mobile-nav-scroll::-webkit-scrollbar { display: none; }
+        
+        /* Interactive Input Glow */
+        .input-glow:focus-within {
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(39, 39, 42, 0.9);
+        }
+
+        /* Chat Assistant Styles */
+        .chat-widget { position: fixed; bottom: 30px; right: 30px; z-index: 100; }
+        .chat-btn {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: linear-gradient(135deg, #3f3f46, #18181b);
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: #fff; font-size: 24px;
+        }
+        .chat-btn:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            border-color: rgba(255,255,255,0.3);
+        }
+        .chat-btn.pulse-ring { animation: pulse-ring 2s infinite; }
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+        .chat-window {
+            position: absolute; bottom: 80px; right: 0;
+            width: 350px; height: 500px;
+            max-height: calc(100vh - 120px); max-width: calc(100vw - 40px);
+            border-radius: 24px; display: flex; flex-direction: column;
+            overflow: hidden; transform-origin: bottom right;
+            transform: scale(0.8) translateY(20px); opacity: 0; pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+        .chat-window.active { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
+        .chat-header {
+            background: rgba(24, 24, 27, 0.85); backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 16px 20px; display: flex; align-items: center; gap: 12px;
+        }
+        .chat-messages {
+            flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;
+            background: rgba(9, 9, 11, 0.95); scroll-behavior: smooth;
+        }
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+        .message-bubble {
+            max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 13px; line-height: 1.6;
+            animation: fadeInUp 0.3s ease forwards; word-wrap: break-word;
+        }
+        .message-user {
+            background: #ffffff; color: #09090b; align-self: flex-end; border-bottom-right-radius: 4px;
+        }
+        .message-bot {
+            background: rgba(39, 39, 42, 0.8); color: #e4e4e7; align-self: flex-start;
+            border-bottom-left-radius: 4px; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .chat-input-area {
+            background: rgba(24, 24, 27, 0.9); padding: 15px;
+            border-top: 1px solid rgba(255,255,255,0.05); display: flex; gap: 10px; align-items: center;
+        }
+        .chat-input {
+            flex-grow: 1; background: rgba(9, 9, 11, 0.8); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; padding: 10px 16px; color: #fff; font-size: 13px; outline: none; transition: all 0.3s;
+        }
+        .chat-input:focus { border-color: rgba(255,255,255,0.3); box-shadow: 0 0 10px rgba(255,255,255,0.05); }
+        .chat-send-btn {
+            width: 36px; height: 36px; border-radius: 50%; background: #fff; color: #000;
+            display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; transition: transform 0.2s;
+        }
+        .chat-send-btn:hover { transform: scale(1.1); }
+        .typing-indicator { display: flex; gap: 4px; padding: 4px 8px; }
+        .typing-dot {
+            width: 6px; height: 6px; background: #a1a1aa; border-radius: 50%;
+            animation: typingBounce 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typingBounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+        /* Modal Styles */
+        .modal-active { display: flex !important; }
+        .modal-show { transform: scale(1) !important; opacity: 1 !important; }
     </style>
 </head>
 <body class="text-zinc-300 flex flex-col min-h-screen relative overflow-x-hidden selection:bg-zinc-700 selection:text-white">
     
-    <!-- AMBIENT GLOW (Cahaya Abu-abu Sangat Halus di Background) -->
-    <div class="fixed top-[-10%] left-[-10%] w-[600px] h-[600px] bg-zinc-800/20 rounded-full blur-[120px] pointer-events-none z-[-1]"></div>
-    <div class="fixed bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-zinc-800/10 rounded-full blur-[120px] pointer-events-none z-[-1]"></div>
+    <!-- AMBIENT GLOW -->
+    <div class="fixed top-[-10%] left-[-10%] w-[600px] h-[600px] bg-zinc-800/20 rounded-full blur-[120px] pointer-events-none z-[-1] animate-pulse-slow"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-zinc-800/10 rounded-full blur-[120px] pointer-events-none z-[-1] animate-pulse-slow" style="animation-delay: 2s;"></div>
 
-    <!-- NAVBAR SPACE GRAY -->
-    <nav class="bg-zinc-950/80 backdrop-blur-lg sticky top-0 z-50 border-b border-zinc-800 transition-all duration-300">
-        <div class="max-w-6xl mx-auto px-6">
-            <div class="flex justify-between h-20">
-                <!-- Logo -->
-                <div class="flex items-center gap-3 cursor-pointer group" onclick="switchTab('beranda')">
-                    <div class="bg-gradient-to-br from-zinc-200 to-zinc-400 text-zinc-950 p-2.5 rounded-xl shadow-lg transition-transform group-hover:scale-105">
-                        <i class="fas fa-layer-group text-lg"></i>
+    <!-- NAVBAR -->
+    <nav class="bg-zinc-950/80 backdrop-blur-xl sticky top-0 z-50 border-b border-zinc-800/60 transition-all duration-300">
+        <div class="max-w-6xl mx-auto px-4 md:px-6">
+            <div class="flex flex-col md:flex-row justify-between h-auto md:h-20 py-4 md:py-0">
+                <!-- Logo & Env Status -->
+                <div class="flex justify-between items-center w-full md:w-auto mb-4 md:mb-0">
+                    <div class="flex items-center gap-3 cursor-pointer group" onclick="switchTab('beranda')">
+                        <div class="bg-gradient-to-br from-zinc-200 to-zinc-400 text-zinc-950 p-2 md:p-2.5 rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.2)] transition-all duration-500 group-hover:scale-110 group-hover:rotate-6">
+                            <i class="fas fa-layer-group text-base md:text-lg"></i>
+                        </div>
+                        <span class="text-xl md:text-2xl font-extrabold text-white tracking-tight transition-colors group-hover:text-zinc-200">Library<span class="text-zinc-500 font-medium transition-colors group-hover:text-zinc-400">Book</span></span>
                     </div>
-                    <span class="text-2xl font-extrabold text-white tracking-tight">Library<span class="text-zinc-500 font-medium">Book</span></span>
+                    
+                    <!-- Status Environment (Mobile) -->
+                    <div class="md:hidden bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full {% if env == 'production' %} bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)] {% else %} bg-zinc-500 {% endif %}"></span>
+                        {{ env }}
+                    </div>
                 </div>
                 
-                <!-- Menu Navigasi Tengah -->
-                <div class="hidden md:flex space-x-8 items-center text-sm font-semibold text-zinc-400">
-                    <button onclick="switchTab('beranda')" id="nav-beranda" class="nav-active hover:text-white h-full px-1 transition-colors">Beranda</button>
-                    <button onclick="switchTab('pencarian')" id="nav-pencarian" class="hover:text-white h-full px-1 transition-colors">Eksplorasi</button>
-                    <button onclick="switchTab('koleksi')" id="nav-koleksi" class="hover:text-white h-full px-1 transition-colors flex items-center">
-                        Koleksi <span id="koleksiBadge" class="ml-2 bg-zinc-800 text-zinc-300 font-bold text-[10px] px-2 py-0.5 rounded-full hidden border border-zinc-700">0</span>
+                <!-- Menu Navigasi -->
+                <div class="flex space-x-6 md:space-x-8 items-center text-sm font-semibold text-zinc-400 overflow-x-auto mobile-nav-scroll pb-2 md:pb-0 w-full md:w-auto justify-start md:justify-center">
+                    <button onclick="switchTab('beranda')" id="nav-beranda" class="nav-active hover:text-white h-full py-1 md:px-1 transition-colors whitespace-nowrap active:scale-95">Beranda</button>
+                    <button onclick="switchTab('pencarian')" id="nav-pencarian" class="hover:text-white h-full py-1 md:px-1 transition-colors whitespace-nowrap active:scale-95">Eksplorasi</button>
+                    <button onclick="switchTab('koleksi')" id="nav-koleksi" class="hover:text-white h-full py-1 md:px-1 transition-colors flex items-center whitespace-nowrap group active:scale-95">
+                        Koleksi <span id="koleksiBadge" class="ml-2 bg-zinc-800 group-hover:bg-zinc-700 text-zinc-300 font-bold text-[10px] px-2 py-0.5 rounded-full hidden border border-zinc-700 transition-all duration-300 group-hover:scale-110">0</span>
                     </button>
-                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="hover:text-white h-full px-1 transition-colors">Analitik</button>
-                    <button onclick="switchTab('tentang')" id="nav-tentang" class="hover:text-white h-full px-1 transition-colors">Tim Kami</button>
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="hover:text-white h-full py-1 md:px-1 transition-colors whitespace-nowrap active:scale-95">Wawasan</button>
+                    <button onclick="switchTab('tentang')" id="nav-tentang" class="hover:text-white h-full py-1 md:px-1 transition-colors whitespace-nowrap active:scale-95">Tim Kami</button>
                 </div>
 
-                <!-- Status Environment -->
-                <div class="flex items-center">
-                    <div class="bg-zinc-900 border border-zinc-800 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2">
+                <!-- Status Environment Desktop -->
+                <div class="hidden md:flex items-center">
+                    <div class="bg-zinc-900 border border-zinc-800 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2 hover:bg-zinc-800 hover:border-zinc-700 transition-all cursor-default">
                         <span class="w-2 h-2 rounded-full {% if env == 'production' %} bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)] {% else %} bg-zinc-500 {% endif %}"></span>
                         {{ env }}
                     </div>
@@ -85,176 +218,187 @@
     </nav>
 
     <!-- KONTEN UTAMA -->
-    <main class="flex-grow container mx-auto px-4 py-12 max-w-6xl relative z-10">
+    <main class="flex-grow container mx-auto px-4 py-8 md:py-12 max-w-6xl relative z-10 overflow-hidden">
         
         <!-- SECTION 1: BERANDA -->
-        <section id="sec-beranda" class="fade-in block">
-            <div class="dark-glass rounded-[2rem] p-12 md:p-24 mb-10 text-center relative overflow-hidden">
-                <div class="inline-block bg-zinc-800 border border-zinc-700 text-zinc-300 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6 shadow-sm">Sistem Akademik Modern</div>
-                <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-6 tracking-tight leading-tight">
-                    Sinkronisasi Data <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">Tanpa Batas</span>
+        <section id="sec-beranda" class="fade-in-up block">
+            <div class="dark-glass rounded-[2rem] p-8 md:p-24 mb-10 text-center relative overflow-hidden">
+                <div class="inline-block bg-zinc-800/80 border border-zinc-700/50 text-zinc-300 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6 shadow-sm fade-in-up delay-100 backdrop-blur-md">Sistem Akademik Modern</div>
+                <h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 tracking-tight leading-tight fade-in-up delay-200">
+                    Sinkronisasi Data <br class="hidden md:block"><span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-300 to-zinc-600 animate-pulse-slow">Tanpa Batas</span>
                 </h1>
-                <p class="text-lg text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                <p class="text-base md:text-lg text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed fade-in-up delay-300">
                     Sistem ekstraksi metadata buku instan yang terhubung dengan basis data global. Dibangun untuk keandalan tinggi dengan antarmuka abu-abu premium yang minimalis.
                 </p>
-                <div class="flex justify-center gap-5">
-                    <button onclick="switchTab('pencarian')" class="bg-white text-zinc-950 hover:bg-zinc-200 font-bold py-3.5 px-8 rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all flex items-center gap-2">
-                        Mulai Ekstraksi <i class="fas fa-arrow-right text-sm"></i>
+                <div class="flex flex-col sm:flex-row justify-center gap-4 sm:gap-5 fade-in-up delay-300">
+                    <button onclick="switchTab('pencarian')" class="bg-white text-zinc-950 hover:bg-zinc-200 font-bold py-3.5 px-8 rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 group">
+                        Mulai Ekstraksi <i class="fas fa-arrow-right text-sm transform group-hover:translate-x-1 transition-transform"></i>
                     </button>
-                    <button onclick="switchTab('tentang')" class="bg-zinc-900 hover:bg-zinc-800 text-white font-medium py-3.5 px-8 rounded-xl border border-zinc-700 transition-colors">
+                    <button onclick="switchTab('tentang')" class="bg-zinc-900/80 hover:bg-zinc-800 text-white font-medium py-3.5 px-8 rounded-xl border border-zinc-700/50 transition-all duration-300 active:scale-95 backdrop-blur-md">
                         Pelajari Sistem
                     </button>
                 </div>
             </div>
             
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="dark-glass p-8 rounded-2xl group">
-                    <div class="w-12 h-12 bg-zinc-800 border border-zinc-700 rounded-xl flex items-center justify-center text-white text-xl mb-6 group-hover:scale-110 transition-transform"><i class="fas fa-bolt"></i></div>
-                    <h3 class="text-xl font-bold mb-3 text-white">Ultra Responsif</h3>
-                    <p class="text-sm text-zinc-400 leading-relaxed">Penarikan puluhan data literatur terjadi secara *real-time* tanpa membuat antarmuka membeku.</p>
+            <div class="mt-16 fade-in-up delay-400">
+                <div class="flex items-center justify-between mb-8 border-b border-zinc-800 pb-4">
+                    <h2 class="text-xl md:text-2xl font-bold text-white flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-red-500 flex items-center justify-center text-white text-xs shadow-[0_0_15px_rgba(249,115,22,0.3)]">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        Buku Terpopuler
+                    </h2>
                 </div>
-                <div class="dark-glass p-8 rounded-2xl group">
-                    <div class="w-12 h-12 bg-zinc-800 border border-zinc-700 rounded-xl flex items-center justify-center text-white text-xl mb-6 group-hover:scale-110 transition-transform"><i class="fas fa-globe"></i></div>
-                    <h3 class="text-xl font-bold mb-3 text-white">Katalog Global</h3>
-                    <p class="text-sm text-zinc-400 leading-relaxed">Terhubung langsung ke ekosistem buku dunia yang terus diperbarui setiap detiknya.</p>
-                </div>
-                <div class="dark-glass p-8 rounded-2xl group">
-                    <div class="w-12 h-12 bg-zinc-800 border border-zinc-700 rounded-xl flex items-center justify-center text-white text-xl mb-6 group-hover:scale-110 transition-transform"><i class="fas fa-bookmark"></i></div>
-                    <h3 class="text-xl font-bold mb-3 text-white">Penyimpanan Lokal</h3>
-                    <p class="text-sm text-zinc-400 leading-relaxed">Simpan hasil penelusuran secara mandiri menggunakan teknologi cache browser yang aman.</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6" id="trendingGrid">
+                    <!-- Cards dari JS -->
                 </div>
             </div>
         </section>
 
-        <!-- SECTION 2: PENCARIAN BUKU (MULTI RESULT) -->
-        <section id="sec-pencarian" class="fade-in hidden">
+        <!-- SECTION 2: PENCARIAN BUKU -->
+        <section id="sec-pencarian" class="fade-in-up hidden">
             <div class="max-w-5xl mx-auto">
-                <div class="mb-10 text-center">
-                    <h2 class="text-3xl font-extrabold text-white mb-2 tracking-tight">Katalog Literatur</h2>
-                    <p class="text-zinc-400">Masukkan kata kunci untuk mengekstrak hingga 6 data teratas.</p>
+                <div class="mb-8 md:mb-10 text-center">
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-2 tracking-tight">Katalog Literatur</h2>
+                    <p class="text-sm md:text-base text-zinc-400">Masukkan kata kunci untuk mengekstrak hingga 6 data teratas.</p>
                 </div>
 
                 <!-- Search Bar Premium -->
-                <div class="dark-glass p-2.5 rounded-2xl flex flex-col md:flex-row gap-3 mb-8">
-                    <div class="flex-grow relative flex items-center bg-zinc-900/80 rounded-xl border border-zinc-700 focus-within:border-zinc-500 focus-within:bg-zinc-900 transition-colors">
-                        <i class="fas fa-search text-zinc-500 absolute left-5 text-lg"></i>
-                        <input type="text" id="searchInput" placeholder="Cari judul, penulis, atau penerbit..." class="w-full pl-12 pr-4 py-4 bg-transparent outline-none text-white placeholder-zinc-500 text-lg">
+                <div class="dark-glass p-2 md:p-2.5 rounded-[1.5rem] flex flex-col md:flex-row gap-3 mb-8 fade-in-up delay-100">
+                    <div class="input-glow flex-grow relative flex items-center bg-zinc-900/80 rounded-xl border border-zinc-700/80 transition-all duration-300">
+                        <i class="fas fa-search text-zinc-500 absolute left-4 md:left-5 text-base md:text-lg"></i>
+                        <input type="text" id="searchInput" placeholder="Cari judul, penulis, atau penerbit..." class="w-full pl-10 md:pl-12 pr-4 py-3.5 md:py-4 bg-transparent outline-none text-white placeholder-zinc-500 text-base md:text-lg transition-all">
                     </div>
-                    <button id="searchBtn" onclick="searchBookAPI()" class="bg-white hover:bg-zinc-200 text-zinc-950 px-10 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+                    <button id="searchBtn" onclick="searchBookAPI()" class="bg-white hover:bg-zinc-200 text-zinc-950 px-6 md:px-10 py-3.5 md:py-4 rounded-xl font-bold transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 shrink-0">
                         <span id="btnText">Ekstrak Data</span>
                     </button>
                 </div>
 
                 <!-- Riwayat Pencarian -->
-                <div class="flex items-center justify-center gap-3 text-sm mb-12">
-                    <span class="text-zinc-500 font-medium"><i class="fas fa-history mr-1"></i> Baru saja dicari:</span>
-                    <div id="recentChips" class="flex flex-wrap gap-2"></div>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-3 text-sm mb-10 fade-in-up delay-200">
+                    <span class="text-zinc-500 font-medium whitespace-nowrap"><i class="fas fa-history mr-1"></i> Baru dicari:</span>
+                    <div id="recentChips" class="flex flex-wrap justify-center gap-2"></div>
                 </div>
 
                 <!-- Error Box -->
-                <div id="errorContainer" class="hidden mb-8 bg-red-950/50 border border-red-900 p-4 rounded-xl text-red-400 text-center text-sm shadow-sm"></div>
+                <div id="errorContainer" class="hidden mb-8 bg-red-950/50 border border-red-900 p-4 rounded-xl text-red-400 text-center text-sm shadow-[0_0_15px_rgba(220,38,38,0.1)] fade-in-up"></div>
 
                 <!-- Loading -->
-                <div id="loadingIndicator" class="hidden text-center py-20">
-                    <div class="inline-block p-4 rounded-full bg-zinc-900 border border-zinc-800 mb-4 shadow-lg">
+                <div id="loadingIndicator" class="hidden text-center py-16 md:py-20 fade-in-up">
+                    <div class="inline-block p-4 rounded-full bg-zinc-900 border border-zinc-800 mb-4 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
                         <i class="fas fa-circle-notch fa-spin text-3xl text-zinc-300"></i>
                     </div>
-                    <p class="text-zinc-400 font-medium">Menyinkronkan data dari server...</p>
+                    <p class="text-zinc-400 font-medium animate-pulse">Menyinkronkan data dari server...</p>
                 </div>
 
                 <!-- Grid Hasil Pencarian -->
-                <div id="resultGrid" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div id="resultGrid" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-6 fade-in-up delay-300">
                     <!-- Cards dari JS -->
                 </div>
             </div>
         </section>
 
         <!-- SECTION 3: KOLEKSI BUKU -->
-        <section id="sec-koleksi" class="fade-in hidden">
-            <div class="mb-10 flex justify-between items-end border-b border-zinc-800 pb-4">
+        <section id="sec-koleksi" class="fade-in-up hidden">
+            <div class="mb-8 md:mb-10 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-zinc-800 pb-4">
                 <div>
-                    <h2 class="text-3xl font-extrabold text-white mb-1">Koleksi Personal</h2>
-                    <p class="text-zinc-400">Pustaka literatur yang Anda simpan secara lokal.</p>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-1">Koleksi Personal</h2>
+                    <p class="text-sm md:text-base text-zinc-400">Pustaka literatur yang Anda simpan secara lokal.</p>
                 </div>
-                <button onclick="clearCollection()" class="bg-zinc-900 border border-zinc-800 hover:bg-red-950/50 hover:border-red-900 hover:text-red-400 text-zinc-300 px-4 py-2 rounded-lg text-sm font-medium transition-all">
-                    <i class="fas fa-trash-alt mr-1"></i> Kosongkan
+                <button onclick="clearCollection()" class="w-full sm:w-auto bg-zinc-900 border border-zinc-800 hover:bg-red-950/50 hover:border-red-900 hover:text-red-400 text-zinc-300 px-4 py-2.5 sm:py-2 rounded-lg text-sm font-medium transition-all duration-300 active:scale-95 group">
+                    <i class="fas fa-trash-alt mr-1 group-hover:rotate-12 transition-transform"></i> Kosongkan
                 </button>
             </div>
 
-            <div id="koleksiGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            <div id="koleksiGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6"></div>
             
-            <div id="koleksiEmpty" class="hidden text-center py-24 dark-glass rounded-[2rem]">
-                <i class="far fa-folder-open text-6xl text-zinc-700 mb-6 block"></i>
-                <p class="text-zinc-400 text-lg mb-4">Katalog koleksi Anda masih kosong.</p>
-                <button onclick="switchTab('pencarian')" class="text-white hover:text-zinc-300 font-bold border-b border-zinc-600 pb-1 transition-colors">Mulai cari buku &rarr;</button>
+            <div id="koleksiEmpty" class="hidden text-center py-20 md:py-24 dark-glass rounded-[2rem] border-dashed border-2 border-zinc-800/50 hover:border-zinc-700/50 transition-colors">
+                <i class="far fa-folder-open text-5xl md:text-6xl text-zinc-700 mb-6 block animate-float"></i>
+                <p class="text-zinc-400 text-base md:text-lg mb-4">Katalog koleksi Anda masih kosong.</p>
+                <button onclick="switchTab('pencarian')" class="text-white hover:text-zinc-300 font-bold border-b border-zinc-600 hover:border-zinc-400 pb-1 transition-all">Mulai cari buku &rarr;</button>
             </div>
         </section>
 
-        <!-- SECTION 4: DASHBOARD STATISTIK -->
-        <section id="sec-dashboard" class="fade-in hidden">
-            <div class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-zinc-800 pb-4">
-                <div>
-                    <h2 class="text-3xl font-extrabold text-white mb-1">Pusat Analitik</h2>
-                    <p class="text-zinc-400">Pemantauan kesehatan dan lalu lintas jaringan API.</p>
-                </div>
-                <button onclick="fetchStats()" class="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white font-medium py-2.5 px-5 rounded-lg text-sm transition-colors shadow-sm">
-                    <i class="fas fa-sync-alt mr-1.5"></i> Segarkan Data
-                </button>
+        <!-- SECTION 4: WAWASAN MEMBACA -->
+        <section id="sec-dashboard" class="fade-in-up hidden">
+            <div class="mb-8 md:mb-10 text-center">
+                <div class="inline-block bg-zinc-800 border border-zinc-700 text-zinc-300 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 shadow-sm">Statistik Personal</div>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-2 tracking-tight">Wawasan Membaca</h2>
+                <p class="text-sm md:text-base text-zinc-400">Ringkasan perjalanan dan pencapaian literasi Anda.</p>
             </div>
             
-            <div class="grid md:grid-cols-3 gap-6 mb-8">
-                <div class="dark-glass p-8 rounded-2xl relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-zinc-800/50 rounded-bl-full"></div>
-                    <p class="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-3">Total API Request</p>
-                    <p id="statRequests" class="text-4xl font-extrabold text-white">0</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6 mb-8 fade-in-up delay-100">
+                <div class="dark-glass p-6 md:p-8 rounded-2xl relative overflow-hidden group">
+                    <div class="w-12 h-12 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-xl flex items-center justify-center text-xl mb-6 shadow-[0_0_15px_rgba(59,130,246,0.1)]"><i class="fas fa-book"></i></div>
+                    <p class="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-1 relative z-10">Buku Disimpan</p>
+                    <p id="wawasanTotal" class="text-3xl md:text-4xl font-extrabold text-white relative z-10">0</p>
                 </div>
-                <div class="dark-glass p-8 rounded-2xl relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-zinc-800/50 rounded-bl-full"></div>
-                    <p class="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-3">Active Users</p>
-                    <p id="statUsers" class="text-4xl font-extrabold text-white">0</p>
+                
+                <div class="dark-glass p-6 md:p-8 rounded-2xl relative overflow-hidden group">
+                    <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center text-xl mb-6 shadow-[0_0_15px_rgba(16,185,129,0.1)]"><i class="far fa-file-alt"></i></div>
+                    <p class="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-1 relative z-10">Total Halaman</p>
+                    <p id="wawasanHalaman" class="text-3xl md:text-4xl font-extrabold text-white relative z-10">0</p>
                 </div>
-                <div class="dark-glass p-8 rounded-2xl relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-zinc-800/50 rounded-bl-full"></div>
-                    <p class="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-3">Server Health</p>
-                    <p class="text-4xl font-extrabold text-white">100%</p>
+                
+                <div class="dark-glass p-6 md:p-8 rounded-2xl relative overflow-hidden group">
+                    <div class="w-12 h-12 bg-purple-500/10 border border-purple-500/20 text-purple-400 rounded-xl flex items-center justify-center text-xl mb-6 shadow-[0_0_15px_rgba(168,85,247,0.1)]"><i class="fas fa-feather-alt"></i></div>
+                    <p class="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-1 relative z-10">Penulis Favorit</p>
+                    <p id="wawasanPenulis" class="text-xl md:text-2xl font-extrabold text-white relative z-10 truncate">-</p>
+                </div>
+                
+                <div class="dark-glass p-6 md:p-8 rounded-2xl relative overflow-hidden group">
+                    <div class="w-12 h-12 bg-orange-500/10 border border-orange-500/20 text-orange-400 rounded-xl flex items-center justify-center text-xl mb-6 shadow-[0_0_15px_rgba(249,115,22,0.1)]"><i class="fas fa-medal"></i></div>
+                    <p class="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-1 relative z-10">Level Membaca</p>
+                    <p id="wawasanLevel" class="text-xl md:text-2xl font-extrabold text-white relative z-10">Pemula</p>
                 </div>
             </div>
             
-            <div class="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl shadow-lg relative">
-                <h3 class="font-bold text-sm mb-6 border-b border-zinc-800 pb-4 flex items-center gap-3 text-white">
-                    <div class="w-2.5 h-2.5 bg-zinc-300 rounded-full animate-pulse shadow-[0_0_8px_rgba(255,255,255,0.5)]"></div> Log Jaringan Terkini
-                </h3>
-                <ul id="logList" class="space-y-3 font-mono text-[13px] max-h-56 overflow-y-auto pr-4 text-zinc-400"></ul>
+            <div class="dark-glass border-dashed border-2 border-zinc-800/50 p-8 rounded-2xl text-center fade-in-up delay-200">
+                <i class="fas fa-quote-left text-3xl text-zinc-700 mb-4 block"></i>
+                <p class="text-zinc-400 italic text-sm md:text-base max-w-2xl mx-auto">"Semakin banyak Anda membaca, semakin banyak hal yang Anda ketahui. Semakin banyak yang Anda pelajari, semakin banyak tempat yang Anda kunjungi." - Dr. Seuss</p>
             </div>
         </section>
 
         <!-- SECTION 5: TENTANG KAMI -->
-        <section id="sec-tentang" class="fade-in hidden max-w-4xl mx-auto">
-            <div class="mb-12 text-center">
-                <span class="inline-block bg-zinc-800 border border-zinc-700 text-zinc-300 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4">Tim Pengembang</span>
-                <h2 class="text-4xl font-extrabold text-white mb-2">Arsitek Sistem</h2>
-                <p class="text-zinc-400 text-lg">Proyek Cloud Computing Kelompok</p>
+        <section id="sec-tentang" class="fade-in-up hidden max-w-4xl mx-auto">
+            <div class="mb-10 md:mb-12 text-center">
+                <span class="inline-block bg-zinc-800/80 border border-zinc-700/50 text-zinc-300 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 backdrop-blur-md shadow-sm">Tim Pengembang</span>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-2">Arsitek Sistem</h2>
+                <p class="text-zinc-400 text-base md:text-lg">Proyek Cloud Computing Kelompok</p>
             </div>
             
-            <div class="dark-glass rounded-[2rem] p-12">
-                <div class="grid md:grid-cols-3 gap-12">
-                    <!-- Anggota 1 -->
-                    <div class="flex flex-col items-center text-center">
-                        <div class="w-24 h-24 bg-gradient-to-br from-zinc-200 to-zinc-400 text-zinc-950 rounded-2xl mb-5 flex items-center justify-center text-3xl font-black shadow-lg transform -rotate-3 border border-zinc-500">S</div>
-                        <h4 class="text-xl font-bold text-white mb-2">Syahrul</h4>
-                        <p class="text-[11px] font-bold text-zinc-300 uppercase tracking-widest bg-zinc-800 border border-zinc-700 px-3 py-1.5 rounded-lg">Cloud Architect</p>
+            <div class="dark-glass rounded-[2rem] p-8 md:p-12">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 md:gap-12">
+                    <!-- Anggota 1: Syahrul -->
+                    <div class="flex flex-col items-center text-center group bg-zinc-900/40 p-6 md:p-8 rounded-[2rem] border border-zinc-800/60 hover:border-zinc-600 transition-all duration-300 hover:-translate-y-2 shadow-lg">
+                        <div class="w-24 h-24 md:w-28 md:h-28 rounded-full mb-5 overflow-hidden shadow-xl border-4 border-zinc-700 group-hover:border-zinc-400 transition-all duration-300 group-hover:scale-110">
+                            <img src="https://avatars.githubusercontent.com/u/150754023?v=4" alt="Syahrul Mubarak" class="w-full h-full object-cover">
+                        </div>
+                        <h4 class="text-xl md:text-2xl font-bold text-white mb-1 group-hover:text-zinc-300 transition-colors">Syahrul</h4>
+                        <p class="text-[10px] md:text-[11px] font-bold text-zinc-300 uppercase tracking-widest bg-zinc-800 border border-zinc-700 px-3 py-1.5 rounded-lg shadow-sm mb-4">Full Stack & Cloud Arch</p>
+                        <p class="text-zinc-400 text-xs md:text-sm mb-6 leading-relaxed">Seorang Full Stack Developer & Gamer dari Sulawesi Tenggara. Kreator di balik karya <b>Literise</b>, <b>Meambo.id</b>, dan <b>We Care You</b>.</p>
+                        
+                        <div class="flex gap-3 mt-auto">
+                            <a href="https://github.com/Syahrrulll" target="_blank" class="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-700 transition-all hover:scale-110 shadow-md"><i class="fa-brands fa-github text-lg"></i></a>
+                            <a href="https://discord.gg/PhqzHDGggr" target="_blank" class="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-[#5865F2] transition-all hover:scale-110 shadow-md"><i class="fa-brands fa-discord text-lg"></i></a>
+                            <a href="https://www.instagram.com/syahrrull1/" target="_blank" class="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-[#E1306C] transition-all hover:scale-110 shadow-md"><i class="fa-brands fa-instagram text-lg"></i></a>
+                        </div>
                     </div>
-                    <!-- Anggota 2 -->
-                    <div class="flex flex-col items-center text-center">
-                        <div class="w-24 h-24 bg-gradient-to-br from-zinc-300 to-zinc-500 text-zinc-950 rounded-2xl mb-5 flex items-center justify-center text-3xl font-black shadow-lg transform rotate-3 border border-zinc-500">I</div>
-                        <h4 class="text-xl font-bold text-white mb-2">Izhar</h4>
-                        <p class="text-[11px] font-bold text-zinc-300 uppercase tracking-widest bg-zinc-800 border border-zinc-700 px-3 py-1.5 rounded-lg">System Admin</p>
+
+                    <!-- Anggota 2: Izhar -->
+                    <div class="flex flex-col items-center text-center group bg-zinc-900/40 p-6 md:p-8 rounded-[2rem] border border-zinc-800/60 hover:border-zinc-600 transition-all duration-300 hover:-translate-y-2 shadow-lg">
+                        <div class="w-24 h-24 md:w-28 md:h-28 bg-gradient-to-br from-zinc-300 to-zinc-500 text-zinc-950 rounded-full mb-5 flex items-center justify-center text-4xl font-black shadow-xl border-4 border-zinc-700 group-hover:border-zinc-400 transition-all duration-300 group-hover:scale-110">I</div>
+                        <h4 class="text-xl md:text-2xl font-bold text-white mb-1 group-hover:text-zinc-300 transition-colors">Izhar</h4>
+                        <p class="text-[10px] md:text-[11px] font-bold text-zinc-300 uppercase tracking-widest bg-zinc-800 border border-zinc-700 px-3 py-1.5 rounded-lg shadow-sm mb-4">System Admin</p>
+                        <p class="text-zinc-400 text-xs md:text-sm mb-6 leading-relaxed">Fokus mengelola infrastruktur, optimasi *backend*, serta sistem keamanan server secara andal.</p>
                     </div>
-                    <!-- Anggota 3 -->
-                    <div class="flex flex-col items-center text-center">
-                        <div class="w-24 h-24 bg-gradient-to-br from-zinc-400 to-zinc-600 text-zinc-950 rounded-2xl mb-5 flex items-center justify-center text-3xl font-black shadow-lg transform -rotate-3 border border-zinc-500">M</div>
-                        <h4 class="text-xl font-bold text-white mb-2">Muiz</h4>
-                        <p class="text-[11px] font-bold text-zinc-300 uppercase tracking-widest bg-zinc-800 border border-zinc-700 px-3 py-1.5 rounded-lg">Frontend UI/UX</p>
+
+                    <!-- Anggota 3: Muiz -->
+                    <div class="flex flex-col items-center text-center group bg-zinc-900/40 p-6 md:p-8 rounded-[2rem] border border-zinc-800/60 hover:border-zinc-600 transition-all duration-300 hover:-translate-y-2 shadow-lg sm:col-span-2 md:col-span-1">
+                        <div class="w-24 h-24 md:w-28 md:h-28 bg-gradient-to-br from-zinc-400 to-zinc-600 text-zinc-950 rounded-full mb-5 flex items-center justify-center text-4xl font-black shadow-xl border-4 border-zinc-700 group-hover:border-zinc-400 transition-all duration-300 group-hover:scale-110">M</div>
+                        <h4 class="text-xl md:text-2xl font-bold text-white mb-1 group-hover:text-zinc-300 transition-colors">Muiz</h4>
+                        <p class="text-[10px] md:text-[11px] font-bold text-zinc-300 uppercase tracking-widest bg-zinc-800 border border-zinc-700 px-3 py-1.5 rounded-lg shadow-sm mb-4">Frontend UI/UX</p>
+                        <p class="text-zinc-400 text-xs md:text-sm mb-6 leading-relaxed">Spesialis dalam merancang antarmuka yang memukau secara estetis dan responsif.</p>
                     </div>
                 </div>
             </div>
@@ -262,36 +406,113 @@
 
     </main>
 
+    <!-- CHAT WIDGET -->
+    <div class="chat-widget fade-in-up delay-300">
+        <!-- Chat Window -->
+        <div class="chat-window dark-glass" id="chatWindow">
+            <div class="chat-header">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-black text-xl shadow-[0_0_10px_rgba(255,255,255,0.2)]">
+                    <i class="fas fa-book-reader text-lg"></i>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold text-sm">Library Assistant</h4>
+                    <p class="text-[10px] text-zinc-400 font-medium">Staf Pustakawan Anda</p>
+                </div>
+                <button onclick="toggleChat()" class="ml-auto text-zinc-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-zinc-800">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message-bubble message-bot">
+                    Halo! Saya staf pustakawan LibraryBook. Ada buku yang ingin Anda cari atau butuh rekomendasi bacaan hari ini?
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Tanya rekomendasi buku..." autocomplete="off">
+                <button onclick="sendChatMessage()" class="chat-send-btn">
+                    <i class="fas fa-paper-plane text-sm"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Chat Button -->
+        <div class="chat-btn pulse-ring" onclick="toggleChat()" id="chatBtn">
+            <i class="fas fa-robot"></i>
+        </div>
+    </div>
+
+    <!-- BOOK MODAL -->
+    <div id="bookModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onclick="closeBookModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="dark-glass rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative z-10 p-6 md:p-8 border border-zinc-700/50 shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="bookModalContent">
+            <button onclick="closeBookModal()" class="absolute top-4 right-4 w-10 h-10 bg-zinc-800/80 hover:bg-zinc-700 rounded-full flex items-center justify-center text-zinc-400 hover:text-white transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="flex flex-col md:flex-row gap-6 md:gap-8">
+                <!-- Cover -->
+                <div class="w-full md:w-1/3 shrink-0 flex justify-center" id="modalCover">
+                    <!-- Image injected via JS -->
+                </div>
+                
+                <!-- Details -->
+                <div class="flex-1">
+                    <div class="inline-block px-3 py-1 bg-zinc-800 rounded-full text-[10px] font-bold text-zinc-400 mb-3 tracking-widest uppercase" id="modalPublisher">Penerbit</div>
+                    <h2 class="text-2xl md:text-3xl font-black text-white mb-2 leading-tight" id="modalTitle">Judul Buku</h2>
+                    <p class="text-zinc-400 font-medium mb-4" id="modalAuthors">Penulis</p>
+                    
+                    <div class="flex flex-wrap gap-3 md:gap-4 mb-6 text-xs md:text-sm text-zinc-500 bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800">
+                        <div class="flex items-center">
+                            <i class="far fa-calendar text-zinc-600 mr-2"></i><span id="modalDate">2023</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="far fa-file-alt text-zinc-600 mr-2"></i><span id="modalPages">300</span> Hal
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-white font-bold mb-2 border-b border-zinc-800 pb-2">Sinopsis</h3>
+                    <p class="text-zinc-300 text-xs md:text-sm leading-relaxed mb-6 max-h-40 overflow-y-auto pr-2 custom-scrollbar" id="modalDescription">
+                        Deskripsi...
+                    </p>
+                    
+                    <div id="modalActions" class="flex flex-col sm:flex-row gap-3">
+                        <!-- Buttons injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- FOOTER -->
-    <footer class="border-t border-zinc-900 py-8 mt-auto z-10 relative bg-zinc-950/50 backdrop-blur-sm">
-        <div class="container mx-auto px-4 text-center text-zinc-500 text-xs font-medium tracking-wide">
+    <footer class="border-t border-zinc-900 py-6 md:py-8 mt-auto z-10 relative bg-zinc-950/50 backdrop-blur-sm">
+        <div class="container mx-auto px-4 text-center text-zinc-500 text-[10px] md:text-xs font-medium tracking-wide">
             <p>&copy; 2026 LibraryBook | Integrasi Sistem Cloud Kelompok 4.</p>
         </div>
     </footer>
 
     <!-- LOGIKA JAVASCRIPT FRONTEND -->
     <script>
-        let currentSearchResults = [];
-
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchStats();
-            updateKoleksiBadge();
-        });
-
+        // TABS & NAVIGASI
+        // ==========================================
         function switchTab(tabId) {
-            ['beranda', 'pencarian', 'koleksi', 'dashboard', 'tentang'].forEach(id => {
-                const sec = document.getElementById('sec-' + id);
-                const nav = document.getElementById('nav-' + id);
-                if (sec) sec.classList.add('hidden');
-                if (nav) nav.classList.remove('nav-active', 'text-white');
+            document.querySelectorAll('section').forEach(sec => {
+                sec.classList.add('hidden');
+                sec.classList.remove('block');
             });
+            document.querySelectorAll('[id^="nav-"]').forEach(nav => {
+                nav.classList.remove('nav-active', 'text-white');
+            });
+
+            document.getElementById(`sec-${tabId}`).classList.remove('hidden');
+            document.getElementById(`sec-${tabId}`).classList.add('block');
+            document.getElementById(`nav-${tabId}`).classList.add('nav-active', 'text-white');
             
-            document.getElementById('sec-' + tabId).classList.remove('hidden');
-            const activeNav = document.getElementById('nav-' + tabId);
-            if(activeNav) activeNav.classList.add('nav-active', 'text-white');
-            
-            if(tabId === 'dashboard') fetchStats();
-            if(tabId === 'koleksi') renderCollection();
+            if(tabId === 'dashboard') {
+                updateWawasan();
+            }
         }
 
         function saveBook(index) {
@@ -304,6 +525,13 @@
                 localStorage.setItem('libraryKoleksi', JSON.stringify(koleksi));
                 updateKoleksiBadge();
                 renderSearchResults(); 
+                
+                // Add pop animation to badge
+                const badge = document.getElementById('koleksiBadge');
+                badge.classList.add('scale-125', 'bg-zinc-600', 'text-white');
+                setTimeout(() => {
+                    badge.classList.remove('scale-125', 'bg-zinc-600', 'text-white');
+                }, 300);
             }
         }
 
@@ -354,53 +582,115 @@
                 emptyState.classList.add('hidden');
                 
                 koleksi.forEach((book, index) => {
+                    const fallbackIcon = `<div class="w-16 h-24 bg-zinc-800 rounded-lg border border-zinc-700 flex items-center justify-center text-zinc-600 shrink-0 transition-transform group-hover:scale-105"><i class="fas fa-book"></i></div>`;
+                    const safeFallback = fallbackIcon.replace(/"/g, '&quot;').replace(/'/g, "\\'");
                     const coverHtml = book.thumbnail ? 
-                        `<img src="${book.thumbnail}" class="w-16 h-24 object-cover rounded-lg shadow-md shrink-0 border border-zinc-700">` : 
-                        `<div class="w-16 h-24 bg-zinc-800 rounded-lg border border-zinc-700 flex items-center justify-center text-zinc-600 shrink-0"><i class="fas fa-book"></i></div>`;
+                        `<img src="${book.thumbnail}" onerror="this.outerHTML='${safeFallback}'" class="w-16 h-24 object-cover rounded-lg shadow-md shrink-0 border border-zinc-700 transition-transform group-hover:scale-105">` : fallbackIcon;
                         
                     grid.innerHTML += `
-                        <div class="dark-glass rounded-2xl p-5 flex flex-col justify-between">
-                            <div class="flex gap-4 mb-5">
+                        <div class="dark-glass rounded-2xl p-4 md:p-5 flex flex-col justify-between group" style="animation: fadeInUp 0.4s ease forwards; animation-delay: ${index * 0.05}s; opacity: 0;">
+                            <div class="flex gap-4 cursor-pointer" onclick="openBookModal(${index}, 'koleksi')">
                                 ${coverHtml}
-                                <div class="flex-grow">
-                                    <h4 class="font-bold text-white text-sm line-clamp-2 mb-1">${book.title}</h4>
-                                    <p class="text-[11px] text-zinc-400 font-medium mb-1">${book.authors}</p>
+                                <div class="flex-1 min-w-0">
+                                    <div class="inline-block px-2 py-0.5 bg-zinc-800 rounded text-[9px] font-bold text-zinc-400 mb-1.5 truncate max-w-full">${book.publisher}</div>
+                                    <h3 class="text-white font-bold text-sm leading-tight mb-1 line-clamp-2 group-hover:text-zinc-300 transition-colors">${book.title}</h3>
+                                    <p class="text-xs text-zinc-500 line-clamp-1 mb-2">${book.authors.join(', ')}</p>
                                     <p class="text-[10px] text-zinc-500">${book.published_date}</p>
                                 </div>
                             </div>
-                            <button onclick="removeBook(${index})" class="w-full text-center text-xs font-bold text-red-400 hover:text-white py-2.5 bg-red-500/10 hover:bg-red-500/30 border border-red-500/20 rounded-xl transition-colors">
-                                Hapus dari Koleksi
-                            </button>
+                            <div class="mt-4 flex gap-2 w-full">
+                                <button onclick="removeBook(${index})" class="flex-1 bg-zinc-800 text-zinc-400 hover:bg-red-500/20 hover:text-red-400 font-bold text-xs py-2 rounded-lg transition-all active:scale-95 border border-zinc-700 flex justify-center items-center"><i class="fas fa-trash-alt mr-1"></i> Hapus</button>
+                                <a href="https://www.google.com/search?tbm=shop&q=${encodeURIComponent(book.title)}+buku" target="_blank" rel="noopener noreferrer" class="flex-1 bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 font-bold text-xs py-2 rounded-lg transition-all active:scale-95 border border-blue-500/30 flex justify-center items-center"><i class="fas fa-shopping-cart mr-1"></i> Beli</a>
+                            </div>
                         </div>
                     `;
                 });
             }
         }
 
+        // ==========================================
+        // WAWASAN MEMBACA
+        // ==========================================
+        function updateWawasan() {
+            const koleksi = JSON.parse(localStorage.getItem('libraryKoleksi')) || [];
+            
+            document.getElementById('wawasanTotal').innerText = koleksi.length;
+            
+            let totalPages = 0;
+            let authorCount = {};
+            
+            koleksi.forEach(b => {
+                totalPages += parseInt(b.page_count) || 0;
+                b.authors.forEach(a => {
+                    authorCount[a] = (authorCount[a] || 0) + 1;
+                });
+            });
+            
+            document.getElementById('wawasanHalaman').innerText = totalPages.toLocaleString('id-ID');
+            
+            let favAuthor = "-";
+            let maxCount = 0;
+            for (const [author, count] of Object.entries(authorCount)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    favAuthor = author;
+                }
+            }
+            document.getElementById('wawasanPenulis').innerText = favAuthor;
+            
+            let level = "Pemula";
+            if (koleksi.length >= 20) level = "Kutu Buku";
+            else if (koleksi.length >= 10) level = "Penggemar";
+            else if (koleksi.length >= 5) level = "Pembaca Aktif";
+            
+            document.getElementById('wawasanLevel').innerText = level;
+        }
+
+        // Jalankan sinkronisasi awal saat web dibuka
+        updateWawasan();
+
         async function fetchStats() {
             try {
                 const response = await fetch('/api/stats');
                 const data = await response.json();
                 
-                document.getElementById('statRequests').innerText = data.total_requests;
-                document.getElementById('statUsers').innerText = data.active_users;
+                // Animate numbers up
+                animateValue('statRequests', 0, data.total_requests, 1000);
+                animateValue('statUsers', 0, data.active_users, 1000);
                 
                 const logList = document.getElementById('logList');
                 logList.innerHTML = '';
                 if(data.recent_searches.length === 0) {
                     logList.innerHTML = '<li><span class="text-zinc-500">Sistem siap. Menunggu aktivitas jaringan...</span></li>';
                 } else {
-                    data.recent_searches.forEach(search => {
-                        logList.innerHTML += `<li><span class="text-zinc-600">[${new Date().toLocaleTimeString()}]</span> GET /book <span class="text-zinc-600">&rarr;</span> <span class="text-zinc-300">"${search}"</span></li>`;
+                    data.recent_searches.forEach((search, idx) => {
+                        logList.innerHTML += `<li style="animation: fadeInUp 0.3s ease forwards; animation-delay: ${idx * 0.1}s; opacity:0;"><span class="text-zinc-600">[${new Date().toLocaleTimeString()}]</span> GET /book <span class="text-zinc-600">&rarr;</span> <span class="text-zinc-300 font-semibold">"${search}"</span></li>`;
                     });
                 }
                 
                 const chipsContainer = document.getElementById('recentChips');
                 chipsContainer.innerHTML = '';
-                data.recent_searches.forEach(search => {
-                    chipsContainer.innerHTML += `<button onclick="clickChip('${search}')" class="bg-zinc-800/50 border border-zinc-700 hover:bg-zinc-700 text-zinc-400 hover:text-white px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors">${search}</button>`;
+                data.recent_searches.forEach((search, idx) => {
+                    chipsContainer.innerHTML += `<button onclick="clickChip('${search}')" style="animation: fadeInUp 0.3s ease forwards; animation-delay: ${idx * 0.05}s; opacity:0;" class="bg-zinc-800/50 border border-zinc-700/80 hover:bg-zinc-700 text-zinc-400 hover:text-white px-3 md:px-4 py-1.5 rounded-full text-[10px] md:text-[11px] font-bold uppercase tracking-wider transition-all duration-300 active:scale-95 shadow-sm hover:shadow-md">${search}</button>`;
                 });
             } catch (e) { console.error("Gagal memuat statistik"); }
+        }
+
+        // Helper to animate numbers
+        function animateValue(id, start, end, duration) {
+            if (start === end) return;
+            var range = end - start;
+            var current = start;
+            var increment = end > start ? 1 : -1;
+            var stepTime = Math.abs(Math.floor(duration / range));
+            var obj = document.getElementById(id);
+            var timer = setInterval(function() {
+                current += increment;
+                obj.innerHTML = current;
+                if (current == end) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
         }
 
         function clickChip(query) {
@@ -436,6 +726,10 @@
                 if (data.result.error) {
                     errorBox.innerText = data.result.error;
                     errorBox.classList.remove('hidden');
+                    saveBookToLocal(bookData);
+                    renderCollection();
+                    renderSearchResults();
+                    updateWawasan();
                 } else {
                     currentSearchResults = data.result; 
                     renderSearchResults();
@@ -454,39 +748,50 @@
             const grid = document.getElementById('resultGrid');
             grid.innerHTML = '';
             
-            let koleksi = JSON.parse(localStorage.getItem('libraryKoleksi')) || [];
+            const savedKoleksi = JSON.parse(localStorage.getItem('libraryKoleksi')) || [];
 
             currentSearchResults.forEach((book, index) => {
-                const isSaved = koleksi.find(b => b.title === book.title);
+                const shopLink = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(book.title)}+buku`;
+                let saveBtn = '';
                 
-                let btnHtml = '';
-                if(isSaved) {
-                    btnHtml = `<button disabled class="w-full mt-5 bg-zinc-800 text-zinc-500 font-bold text-xs py-3 rounded-xl border border-zinc-700 cursor-not-allowed"><i class="fas fa-check mr-1 text-zinc-400"></i> Tersimpan</button>`;
+                if (savedKoleksi.some(b => b.title === book.title)) {
+                    saveBtn = `<button onclick="removeBook('${book.title.replace(/'/g, "\\'")}')" class="flex-1 bg-zinc-800 text-zinc-400 hover:bg-red-500/20 hover:text-red-400 font-bold text-xs md:text-sm py-3 rounded-xl transition-all duration-300 active:scale-95 border border-zinc-700 hover:border-red-500/30 flex items-center justify-center"><i class="fas fa-trash-alt mr-1 md:mr-2"></i> Hapus</button>`;
                 } else {
-                    btnHtml = `<button onclick="saveBook(${index})" class="w-full mt-5 bg-white text-zinc-950 hover:bg-zinc-200 font-bold text-xs py-3 rounded-xl transition-colors shadow-lg"><i class="far fa-bookmark mr-1"></i> Simpan Buku</button>`;
+                    saveBtn = `<button onclick="saveBook(${index})" class="flex-1 bg-white text-zinc-950 hover:bg-zinc-200 font-bold text-xs md:text-sm py-3 rounded-xl transition-all duration-300 active:scale-95 shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] flex items-center justify-center"><i class="far fa-bookmark mr-1 md:mr-2"></i> Simpan</button>`;
                 }
+                
+                const shopBtn = `<a href="${shopLink}" target="_blank" rel="noopener noreferrer" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs md:text-sm py-3 rounded-xl transition-all duration-300 active:scale-95 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] flex items-center justify-center border border-blue-500/30"><i class="fas fa-shopping-cart mr-1 md:mr-2"></i> Beli Buku</a>`;
 
+                const btnHtml = `<div class="flex gap-2 md:gap-3 mt-5 w-full">${saveBtn}${shopBtn}</div>`;
+
+                const fallbackIcon = `<div class="w-full h-40 md:h-48 bg-zinc-800/50 rounded-xl mb-4 md:mb-5 border border-zinc-700 flex items-center justify-center text-zinc-600 text-3xl group-hover:shadow-xl transition-shadow"><i class="fas fa-book"></i></div>`;
+                const safeFallback = fallbackIcon.replace(/"/g, '&quot;').replace(/'/g, "\\'");
                 const coverHtml = book.thumbnail ? 
-                    `<img src="${book.thumbnail}" class="w-full h-40 md:h-48 object-cover rounded-xl mb-5 border border-zinc-700 shadow-lg">` : 
-                    `<div class="w-full h-40 md:h-48 bg-zinc-800/50 rounded-xl mb-5 border border-zinc-700 flex items-center justify-center text-zinc-600 text-3xl"><i class="fas fa-book"></i></div>`;
+                    `<img src="${book.thumbnail}" onerror="this.outerHTML='${safeFallback}'" class="w-full h-40 md:h-48 object-cover rounded-xl mb-4 md:mb-5 border border-zinc-700 shadow-lg group-hover:shadow-xl transition-shadow">` : fallbackIcon;
 
                 grid.innerHTML += `
-                    <div class="dark-glass rounded-3xl p-6 flex flex-col justify-between fade-in" style="animation-delay: ${index * 0.05}s">
+                    <div class="dark-glass rounded-3xl p-5 md:p-6 flex flex-col justify-between group" style="animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: ${index * 0.1}s; opacity: 0;">
                         <div>
-                            <div class="flex gap-5">
-                                <div class="w-1/3 shrink-0">${coverHtml}</div>
-                                <div class="w-2/3">
-                                    <h3 class="font-bold text-white text-base leading-tight mb-2 line-clamp-2">${book.title}</h3>
-                                    <p class="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3">${book.authors.join(', ')}</p>
-                                    <div class="text-[11px] text-zinc-400 space-y-1.5 bg-zinc-900/50 p-3 rounded-xl border border-zinc-700/50">
-                                        <p class="flex items-center gap-2"><i class="far fa-building w-3 text-zinc-500"></i> <span class="truncate">${book.publisher}</span></p>
-                                        <p class="flex items-center gap-2"><i class="far fa-calendar w-3 text-zinc-500"></i> ${book.published_date}</p>
-                                        <p class="flex items-center gap-2"><i class="far fa-file-alt w-3 text-zinc-500"></i> ${book.page_count} Hal</p>
+                            <div class="flex flex-col sm:flex-row gap-4 md:gap-5">
+                                <div class="w-full sm:w-1/3 shrink-0 cursor-pointer" onclick="openBookModal(${index}, 'search')">
+                                    ${coverHtml}
+                                </div>
+                                <div class="flex-1 min-w-0 flex flex-col cursor-pointer" onclick="openBookModal(${index}, 'search')">
+                                    <div class="inline-block px-3 py-1 bg-zinc-800 rounded-full text-[10px] font-bold text-zinc-400 self-start mb-3 border border-zinc-700 truncate max-w-full tracking-wider uppercase">
+                                        ${book.publisher}
+                                    </div>
+                                    <h2 class="text-xl md:text-2xl font-black text-white mb-2 leading-tight group-hover:text-zinc-300 transition-colors">${book.title}</h2>
+                                    <p class="text-zinc-400 font-medium text-sm mb-3 md:mb-4 tracking-wide">${book.authors.join(', ')}</p>
+                                    
+                                    <div class="flex flex-col gap-2 mt-auto text-xs md:text-sm text-zinc-500 bg-zinc-900/50 p-3 md:p-4 rounded-2xl border border-zinc-800">
+                                        <div class="flex items-center"><i class="far fa-calendar text-zinc-600 w-5"></i> ${book.published_date}</div>
+                                        <div class="flex items-center"><i class="far fa-file-alt text-zinc-600 w-5"></i> ${book.page_count} Halaman</div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="mt-5 pt-4 border-t border-zinc-700/50">
-                                <p class="text-xs text-zinc-400 line-clamp-3 leading-relaxed">${book.description}</p>
+                            
+                            <div class="mt-5 md:mt-6 cursor-pointer" onclick="openBookModal(${index}, 'search')">
+                                <p class="text-zinc-300 text-xs md:text-sm leading-relaxed line-clamp-3 overflow-hidden text-ellipsis">${book.description}</p>
                             </div>
                         </div>
                         ${btnHtml}
@@ -500,6 +805,194 @@
         document.getElementById('searchInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') searchBookAPI();
         });
+
+        // ==========================================
+        // LOGIKA BOOK MODAL
+        // ==========================================
+        function openBookModal(index, source = 'search') {
+            const book = source === 'search' ? currentSearchResults[index] : 
+                         source === 'koleksi' ? JSON.parse(localStorage.getItem('libraryKoleksi'))[index] : 
+                         trendingBooks[index];
+            if (!book) return;
+
+            document.getElementById('modalTitle').innerText = book.title;
+            document.getElementById('modalAuthors').innerText = book.authors.join(', ');
+            document.getElementById('modalPublisher').innerText = book.publisher;
+            document.getElementById('modalDate').innerText = book.published_date;
+            document.getElementById('modalPages').innerText = book.page_count;
+            document.getElementById('modalDescription').innerText = book.description;
+
+            const fallbackIcon = `<div class="w-full aspect-[2/3] bg-zinc-800/80 rounded-2xl border border-zinc-700 flex items-center justify-center text-zinc-600 text-5xl shadow-xl"><i class="fas fa-book"></i></div>`;
+            const safeFallback = fallbackIcon.replace(/"/g, '&quot;').replace(/'/g, "\\'");
+            const coverHtml = book.thumbnail ? 
+                `<img src="${book.thumbnail}" onerror="this.outerHTML='${safeFallback}'" class="w-full aspect-[2/3] object-cover rounded-2xl shadow-2xl border border-zinc-700/50">` : fallbackIcon;
+            
+            document.getElementById('modalCover').innerHTML = coverHtml;
+
+            const shopLink = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(book.title)}+buku`;
+            document.getElementById('modalActions').innerHTML = `
+                <a href="${shopLink}" target="_blank" rel="noopener noreferrer" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm py-3 rounded-xl transition-all duration-300 active:scale-95 shadow-[0_0_15px_rgba(59,130,246,0.3)] text-center border border-blue-500/30 flex items-center justify-center"><i class="fas fa-shopping-cart mr-2"></i> Beli Buku</a>
+            `;
+
+            const modal = document.getElementById('bookModal');
+            const modalContent = document.getElementById('bookModalContent');
+            
+            modal.classList.add('modal-active');
+            // Trigger reflow for animation
+            void modal.offsetWidth;
+            modalContent.classList.add('modal-show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeBookModal() {
+            const modal = document.getElementById('bookModal');
+            const modalContent = document.getElementById('bookModalContent');
+            
+            modalContent.classList.remove('modal-show');
+            setTimeout(() => {
+                modal.classList.remove('modal-active');
+                document.body.style.overflow = '';
+            }, 300); // Wait for transition
+        }
+
+        // ==========================================
+        // INISIALISASI & STATE
+        // ==========================================
+        let currentSearchResults = [];
+        
+        const trendingBooks = [
+            { title: "Bumi Manusia", authors: ["Pramoedya Ananta Toer"], publisher: "Lentera Dipantara", published_date: "2005", page_count: 535, description: "Bumi Manusia adalah buku pertama dari Tetralogi Buru. Mengambil latar belakang awal abad ke-20...", thumbnail: "https://covers.openlibrary.org/b/isbn/9789799731234-L.jpg" },
+            { title: "Sapiens", authors: ["Yuval Noah Harari"], publisher: "KPG", published_date: "2014", page_count: 526, description: "Riwayat Singkat Umat Manusia yang menjelaskan bagaimana Homo Sapiens menaklukkan dunia...", thumbnail: "https://covers.openlibrary.org/b/isbn/9780062316097-L.jpg" },
+            { title: "Atomic Habits", authors: ["James Clear"], publisher: "Gramedia Pustaka Utama", published_date: "2019", page_count: 356, description: "Cara Mudah & Terbukti Membentuk Kebiasaan Baik dan Menghilangkan Kebiasaan Buruk...", thumbnail: "https://covers.openlibrary.org/b/isbn/9780735211292-L.jpg" },
+            { title: "Filosofi Teras", authors: ["Henry Manampiring"], publisher: "Penerbit Buku Kompas", published_date: "2018", page_count: 320, description: "Filsafat Yunani-Romawi Kuno untuk Mental Tangguh Masa Kini, panduan stoisisme praktis...", thumbnail: "https://covers.openlibrary.org/b/isbn/9786024125189-L.jpg" },
+            { title: "Laskar Pelangi", authors: ["Andrea Hirata"], publisher: "Bentang Pustaka", published_date: "2005", page_count: 529, description: "Kisah inspiratif sepuluh anak Belitung yang berjuang menempuh pendidikan...", thumbnail: "https://covers.openlibrary.org/b/isbn/9789793062792-L.jpg" },
+            { title: "Laut Bercerita", authors: ["Leila S. Chudori"], publisher: "KPG", published_date: "2017", page_count: 379, description: "Novel sejarah yang mengangkat kisah hilangnya aktivis 1998 di Indonesia...", thumbnail: "https://covers.openlibrary.org/b/isbn/9786024246945-L.jpg" },
+            { title: "Sebuah Seni untuk Bersikap Bodo Amat", authors: ["Mark Manson"], publisher: "Grasindo", published_date: "2018", page_count: 246, description: "Pendekatan waras untuk menjalani hidup yang lebih baik...", thumbnail: "https://covers.openlibrary.org/b/isbn/9786024526986-L.jpg" },
+            { title: "Rich Dad Poor Dad", authors: ["Robert T. Kiyosaki"], publisher: "Gramedia", published_date: "2017", page_count: 242, description: "Apa yang diajarkan orang kaya pada anak mereka tentang uang...", thumbnail: "https://covers.openlibrary.org/b/isbn/9781612680194-L.jpg" }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateKoleksiBadge();
+            renderCollection();
+            renderTrendingBooks();
+            updateWawasan();
+        });
+
+        function renderTrendingBooks() {
+            const container = document.getElementById('trendingGrid');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            trendingBooks.forEach((book, index) => {
+                container.innerHTML += `
+                    <div class="cursor-pointer group" onclick="openBookModal(${index}, 'trending')">
+                        <div class="overflow-hidden rounded-xl aspect-[2/3] shadow-lg mb-3 border border-zinc-800">
+                            <img src="${book.thumbnail}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                        </div>
+                        <h4 class="font-bold text-white text-sm line-clamp-1 group-hover:text-zinc-300 transition-colors">${book.title}</h4>
+                        <p class="text-[11px] text-zinc-500 line-clamp-1">${book.authors[0]}</p>
+                    </div>
+                `;
+            });
+        }
+
+        // ==========================================
+        // LOGIKA CHAT ASSISTANT
+        // ==========================================
+        let chatContext = [];
+
+        function toggleChat() {
+            const window = document.getElementById('chatWindow');
+            const btn = document.getElementById('chatBtn');
+            window.classList.toggle('active');
+            
+            if (window.classList.contains('active')) {
+                btn.classList.remove('pulse-ring');
+                document.getElementById('chatInput').focus();
+            }
+        }
+
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendChatMessage();
+        });
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Clear input
+            input.value = '';
+
+            // Render User Message
+            renderChatMessage(message, 'user');
+
+            // Add to context
+            chatContext.push({ "role": "user", "content": message });
+
+            // Show Typing Indicator
+            const messagesContainer = document.getElementById('chatMessages');
+            const typingId = 'typing-' + Date.now();
+            messagesContainer.innerHTML += `
+                <div id="${typingId}" class="message-bubble message-bot typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            scrollToBottom();
+
+            try {
+                // Send to backend
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages: chatContext })
+                });
+                const data = await response.json();
+
+                // Remove typing indicator
+                const typingEl = document.getElementById(typingId);
+                if (typingEl) typingEl.remove();
+
+                if (data.error) {
+                    renderChatMessage("Maaf, terjadi kesalahan: " + data.error, 'bot');
+                } else {
+                    renderChatMessage(data.reply, 'bot');
+                    chatContext.push({ "role": "assistant", "content": data.reply });
+                    // Batasi context history (maks 10 pesan)
+                    if (chatContext.length > 10) {
+                        chatContext = chatContext.slice(chatContext.length - 10);
+                    }
+                }
+            } catch (e) {
+                const typingEl = document.getElementById(typingId);
+                if (typingEl) typingEl.remove();
+                renderChatMessage("Koneksi gagal. Cek jaringan Anda.", 'bot');
+            }
+        }
+
+        function renderChatMessage(text, sender) {
+            const container = document.getElementById('chatMessages');
+            
+            // Simple markdown parsing for bold text
+            let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // Parse newlines to br
+            formattedText = formattedText.replace(/\n/g, '<br>');
+
+            container.innerHTML += `
+                <div class="message-bubble message-${sender}">
+                    ${formattedText}
+                </div>
+            `;
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const container = document.getElementById('chatMessages');
+            container.scrollTop = container.scrollHeight;
+        }
+
     </script>
 </body>
 </html>

@@ -2,8 +2,9 @@ import os
 import requests
 import argparse
 import time
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 from dotenv import load_dotenv
+import google.generativeai as genai
 
 # ==========================================
 # 1. KONFIGURASI ENVIRONMENT & STATE
@@ -13,7 +14,12 @@ app = Flask(__name__)
 
 APP_ENV = os.getenv('APP_ENV', 'development')
 EXTERNAL_API_URL = os.getenv('EXTERNAL_API_URL', 'https://www.googleapis.com/books/v1/volumes')
+OPENLIBRARY_API_URL = os.getenv('OPENLIBRARY_API_URL', 'https://openlibrary.org/search.json')
 API_KEY = os.getenv('EXTERNAL_API_KEY', '')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
+
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
 
 # In-Memory State (Data sementara)
 recent_searches = ["bumi manusia", "clean code", "filosofi teras"]
@@ -32,7 +38,8 @@ def fetch_book_metadata(query):
     if API_KEY: params['key'] = API_KEY
         
     try:
-        response = requests.get(EXTERNAL_API_URL, params=params)
+        # Menambahkan timeout 10 detik agar tidak lag berkepanjangan
+        response = requests.get(EXTERNAL_API_URL, params=params, timeout=10)
         system_stats["total_api_requests"] += 1
         
         if response.status_code == 200:
@@ -62,11 +69,61 @@ def fetch_book_metadata(query):
                     recent_searches.pop()
                 
                 return results # Kembalikan array/list dari banyak buku
-            return {"error": "Buku tidak ditemukan di database Google Books."}
+            return fetch_from_openlibrary(query)
         else:
-            return {"error": f"Gagal terhubung ke API. Status: {response.status_code}"}
+            # Fallback ke OpenLibrary jika Google error (misal 429 Too Many Requests)
+            return fetch_from_openlibrary(query)
     except Exception as e:
-        return {"error": f"Kesalahan jaringan: {str(e)}"}
+        # Fallback jika timeout atau gagal koneksi ke Google
+        return fetch_from_openlibrary(query)
+
+def fetch_from_openlibrary(query):
+    try:
+        url = OPENLIBRARY_API_URL
+        params = {'q': query, 'limit': 6}
+        response = requests.get(url, params=params, timeout=10)
+        system_stats["total_api_requests"] += 1
+        
+        if response.status_code == 200:
+            data = response.json()
+            if 'docs' in data and len(data['docs']) > 0:
+                results = []
+                for item in data['docs'][:6]:
+                    cover_id = item.get('cover_i')
+                    if cover_id:
+                        thumbnail = f"https://covers.openlibrary.org/b/id/{cover_id}-M.jpg"
+                    elif item.get('isbn') and len(item['isbn']) > 0:
+                        isbn = item['isbn'][0]
+                        thumbnail = f"https://covers.openlibrary.org/b/isbn/{isbn}-M.jpg"
+                    else:
+                        thumbnail = ""
+                    
+                    authors = item.get('author_name', ['Penulis tidak diketahui'])
+                    publishers = item.get('publisher', ['Penerbit tidak diketahui'])
+                    
+                    results.append({
+                        "title": item.get('title', 'Tidak diketahui'),
+                        "authors": authors,
+                        "publisher": publishers[0] if publishers else 'Penerbit tidak diketahui',
+                        "published_date": str(item.get('first_publish_year', 'Tahun tidak diketahui')),
+                        "page_count": item.get('number_of_pages_median', 0),
+                        "description": "Tidak ada sinopsis tersedia dari sumber ini. (Data dari OpenLibrary)",
+                        "thumbnail": thumbnail
+                    })
+                
+                query_lower = query.lower()
+                if query_lower in recent_searches:
+                    recent_searches.remove(query_lower)
+                recent_searches.insert(0, query_lower)
+                if len(recent_searches) > 6: 
+                    recent_searches.pop()
+                
+                return results
+            return {"error": "Buku tidak ditemukan di database manapun (Google & OpenLibrary)."}
+        else:
+            return {"error": f"Semua API gangguan. Status OpenLibrary: {response.status_code}"}
+    except Exception as e:
+        return {"error": f"Kesalahan jaringan total saat mencoba fallback: {str(e)}"}
 
 # ==========================================
 # 3. ROUTING WEB SERVER
@@ -92,6 +149,37 @@ def get_system_stats():
         "active_users": system_stats["active_users"],
         "recent_searches": recent_searches
     })
+
+@app.route('/api/chat', methods=['POST'])
+def chat_assistant():
+    try:
+        data = request.get_json()
+        messages = data.get('messages', [])
+        
+        if not messages:
+            return jsonify({"error": "Pesan tidak boleh kosong."}), 400
+            
+        system_instruction = "Anda adalah Pustakawan LibraryBook, asisten literatur yang berdedikasi, cerdas, dan ramah. Jangan pernah menyebut diri Anda sebagai Gemini, AI, LLM, atau program komputer. Bertindaklah seperti manusia staf perpustakaan yang nyata. Tugas utama Anda adalah memberikan rekomendasi buku, menjelaskan isi buku, dan membantu pengguna mengeksplorasi dunia literatur. Berikan respons yang ringkas, elegan, dan menggunakan bahasa Indonesia yang baik."
+        
+        # Inisialisasi model
+        model = genai.GenerativeModel('gemini-2.5-flash', system_instruction=system_instruction)
+        
+        # Konversi format histori chat
+        history = []
+        for msg in messages[:-1]:
+            role = "user" if msg['role'] == "user" else "model"
+            history.append({"role": role, "parts": [msg['content']]})
+            
+        chat = model.start_chat(history=history)
+        
+        # Kirim pesan terbaru
+        user_message = messages[-1]['content']
+        response = chat.send_message(user_message)
+        
+        return jsonify({"reply": response.text})
+            
+    except Exception as e:
+        return jsonify({"error": f"Terjadi kesalahan pada Gemini API: {str(e)}"}), 500
 
 # ==========================================
 # 4. CLI SERVER
