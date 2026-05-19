@@ -717,19 +717,20 @@
 
             try {
                 const response = await fetch(`/api/book/${encodeURIComponent(query)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+                
                 const data = await response.json();
 
                 inputEl.disabled = false; btn.disabled = false;
                 btnText.innerHTML = 'Ekstrak Data';
                 loading.classList.add('hidden');
 
-                if (data.result.error) {
+                if (data.result && data.result.error) {
                     errorBox.innerText = data.result.error;
                     errorBox.classList.remove('hidden');
-                    saveBookToLocal(bookData);
-                    renderCollection();
-                    renderSearchResults();
-                    updateWawasan();
                 } else {
                     currentSearchResults = data.result; 
                     renderSearchResults();
@@ -739,8 +740,9 @@
                 inputEl.disabled = false; btn.disabled = false;
                 btnText.innerHTML = 'Ekstrak Data';
                 loading.classList.add('hidden');
-                errorBox.innerText = 'Koneksi ke server terputus. Pastikan server Flask berjalan.';
+                errorBox.innerText = 'Gagal terhubung ke server (API Error). Coba lagi beberapa saat.';
                 errorBox.classList.remove('hidden');
+                console.error("Fetch Error:", err);
             }
         }
 
